@@ -1,5 +1,5 @@
 ---
-title: "WORKSHOP 3 (THIRD CLASS)"
+title: "WORKSHOP 3 (THIRD CLASS)" nd work shop four tidy verse/ data wrangling
 author: "KAUR"
 date: '2022-03-01'
 output: html_document
@@ -10,17 +10,37 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 ```
-library(tidyverse)
-
+vie
 ## data wrangling
 
+
+
 ```{r}
-# data loading
+survey<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-05-18/survey.csv")
+
+country<-survey%>%
+  distinct(country)
+
+survey%>%count(country,sort=TRUE)
+
+survey_short<-survey%>%
+  filter(
+    country=="United States"| 
+      country=="USA"|
+      country=="US"|
+      country=="U.S"|
+      country=="United States of America"|
+      country=="Usa"
+    )
+
+survey_short%>%filter(annual_salary>50000 & gender=="Woman")
+
+survey_short%>%select(how_old_are_you, industry,annual_salary,gender)%>%
+  filter(gender=="Woman")%>%filter(industry=="education")
 
 
-data<- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-05-18/survey.csv")
 
-data%>%head()
+    
+
 
 ```
-
