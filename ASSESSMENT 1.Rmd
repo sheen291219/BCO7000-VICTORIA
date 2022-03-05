@@ -31,6 +31,40 @@ You will need to *answer* each task using the text/graph narration and include R
 
 5. Review the suggested documentation on how to insert links in the .rmd file and include an in-text link to https://rmarkdown.rstudio.com/lesson-8.html 
 
+ Insert an R chunk and create a variable with this dataset
+https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-09-04/fastfood_calories.csv
+
+The name of the variable should be `fastfood`
+
+7. Display the first 10 rows of the dataset using head() and kable(). 
+
+Display the first 10 rows of the dataset and the first 5 variables
+
+Use Help and the link below to read more about those functions  https://bookdown.org/yihui/rmarkdown-cookbook/kable.html
+
+
+
+
+```{r}
+fastfood<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-09-04/fastfood_calories.csv")
+
+fastfood%>%head(10)
+
+fastfood%>%select(calories,cal_fat,total_fat,sat_fat,trans_fat)
+
+
+
+
+```
+
+
+
+
+
+
+```
+
+
 
 
 
