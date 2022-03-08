@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 ```
-vie
+
 ## data wrangling
 
 
@@ -21,26 +21,146 @@ survey<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/
 country<-survey%>%
   distinct(country)
 
+
 survey%>%count(country,sort=TRUE)
 
 survey_short<-survey%>%
   filter(
-    country=="United States"| 
-      country=="USA"|
-      country=="US"|
-      country=="U.S"|
-      country=="United States of America"|
+    country=="United States" |
+      country=="USA" | 
+      country=="US" | 
+      country=="U.S." | 
+      country=="United States of America" |
       country=="Usa"
     )
+
 
 survey_short%>%filter(annual_salary>50000 & gender=="Woman")
 
 survey_short%>%select(how_old_are_you, industry,annual_salary,gender)%>%
   filter(gender=="Woman")%>%filter(industry=="education")
+```
+
+arranging observations
+```{r}
+survey_short%>%top_n(n=10)
 
 
+survey_short%>%arrange(desc(annual_salary))%>%
+  select(industry, annual_salary)
 
-    
-
+survey_short%>%count(industry,sort=TRUE)
 
 ```
+
+GROUPPINGS AND NEW VARIABLES
+```{r}
+
+survey_short%>%
+  mutate(total_salary=annual_salary+other_monetary_comp)%>%
+  select(industry,total_salary,annual_salary,other_monetary_comp)
+
+
+survey_short%>%
+  mutate(average_salary=mean(annual_salary, na.rm=TRUE))%>%
+  select(industry, average_salary)
+survey_short%>%
+  group_by(industry)%>%
+  mutate(average_salary=mean(annual_salary, na.rm=TRUE))%>%
+           select(industry, average_salary)%>%
+           arrange(desc(average_salary))%>%
+           ungroup()
+           
+```
+
+# add a new variable max_salary which is maximum salary per industry 
+```{r}
+survey_short%>%
+  group_by(industry)%>%
+  mutate(min_salary=min(annual_salary, na.rm=TRUE))%>%
+           select(industry, min_salary)%>%
+           arrange(desc(min_salary))%>%
+           ungroup()
+```
+
+survey_short%>%
+  group_by(industry, gender)%>%
+  mutate(average_salary=mean(annual_salary, na.rm=TRUE))%>%
+           select(industry, gender, average_salary)%>%
+           arrange(desc(average_salary))%>%
+           ungroup()
+```{r}
+
+survey_short%>%
+  group_by(industry, gender)%>%
+  mutate(average_salary=mean(annual_salary, na.rm=TRUE))%>%
+           select(industry, gender, average_salary)%>%
+           arrange(desc(average_salary))%>%
+           ungroup()
+
+```
+summarising data 
+
+```{r}
+
+survey_short%>%
+  group_by(industry)%>%
+summarise(average_salary=mean(annual_salary,na.rm=TRUE))
+
+```
+
+
+
+```{r}
+survey_short%>%
+  group_by(industry)%>%
+summarise(average_salary=mean(annual_salary,na.rm=TRUE))
+```
+
+```{r}
+survey_short%>%
+  group_by(gender,industry)%>%
+summarise(average_salary=mean(annual_salary,na.rm=TRUE))
+```
+
+case_when
+```{r}
+survey_short_veryshort<-survey_short%>%
+  select(industry, gender,annual_salary)
+
+#if annual_salary is more than 700000 than your annual_salary_level is high, otherwise it is low 
+
+
+survey_short_veryshort%>%
+  mutate(
+    annual_salary_level=case_when(annual_salary>700000~ "high", T~"loW")
+    
+    
+  )%>%arrange(desc(annual_salary))
+```
+#if annual_salary is more than 700000 than your annual_salary_level is high, 
+# if annual_salaryis more than 700000 but lessor equal to700000 then your annual_salary-level is middle 
+#otherwiseit is low 
+
+```{r}
+
+survey_short_veryshort%>%
+  mutate(
+    annual_salary_level=case_when(annual_salary>700000~ "high",
+                                  annual_salary>700000& annual_salary<=700000~"middle",
+                                  T~"loW")
+     )%>%arrange(desc(annual_salary))
+```
+#create variable highly_paid_women
+#if gender=="Woman" and annual_salary>50000 then (~)it is "high, otherwise itis low 
+
+```{r}
+survey_short_veryshort%>%
+  mutate(
+    highly_paid_women=case_when(
+      gender=="Woman"& annual_salary>50000~ "high", 
+                                   
+                                  T~"loW")
+     )%>%arrange(desc(annual_salary))
+```
+
