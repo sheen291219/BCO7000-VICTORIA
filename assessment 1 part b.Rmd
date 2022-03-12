@@ -44,11 +44,104 @@ fastfood%>%
                          T~"average")
     
   )
+ 
+summary(fastfood)
+#install.packages("skimr")
+
+library(skimr)
+
+skim(fastfood)
+
+fastfood%>%top_n(n=10)
+
+
+fastfood%>%arrange(desc(restaurant))
+  
+
+fastfood%>%count(restaurant,sort=TRUE)
+
+item<-fastfood%>%
+  distinct(item)
+
+
+fastfood%>%count(item,sort=TRUE)
+
+
+
+fastfood%>%
+  group_by(item)%>%
+summarise(fastfood=mean(fastfood,na.rm=TRUE))
+
+fastfood%>%
+  group_by(calories)%>%
+summarise(restaurant=mean(restaurant,na.rm=TRUE))
+
+
+fastfood%>%
+  group_by(restaurant)%>%
+  mutate(restaurant=min(restaurant, na.rm=TRUE))%>%
+           select(calories)%>%
+           arrange(desc(calories))%>%
+           ungroup()
+
+fastfood%>%
+  group_by(restaurant)%>%
+  mutate(average_calories=mean(calories, na.rm = TRUE))%>%
+  select(restaurant, average_calories)
+
+fastfood%>%
+  group_by(restaurant)%>%
+  mutate(max_fat=mean(total_fat, na.rm = TRUE))%>%
+  select(restaurant, max_fat)
+
+fastfood%>%
+  group_by(restaurant)%>%
+  mutate(min_cholesterol=mean(cholesterol, na.rm = TRUE))%>%
+  select(restaurant, min_cholesterol)
+
+
+fastfood%>%
+  ggplot(
+    aes(total_fat, restaurant)
+  )+
+    geom_point()
+
+fastfood%>%
+ group_by(restaurant)%>%
+  ggplot(
+    aes(total_fat, restaurant)
+  )+
+  geom_point()
+fastfood%>%arrange(desc(total_fat>40))%>%
+  select(restaurant, total_fat)
+  
+  
+
   
     
 
-```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+summary (fastfood)
+#install.packages("skimr")
 8. Display the observations that has more than 1000 calories
 
 9. Arrange observations with more than 40 in total_fat and more than 80 in total_carb in the descending order (PLEASE USE THE VARIABLE OF YOUR CHOICE TO ORGANISE THE DESCENDING ORDER) and save them to a new variable (dataset) called `dont_eat_this`
