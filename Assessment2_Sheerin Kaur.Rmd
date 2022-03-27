@@ -1,0 +1,199 @@
+---
+title: "Assignment 2"
+author: "Sheerin Kaur, S4644440"
+date: "March 27, 2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+#Install Packages
+
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+
+#install.packages("knitr")
+library(knitr)
+
+#install.packages("skimr")
+library(skimr)
+
+#install.packages("randomForest")
+library(randomForest)
+```
+
+### Part 1: formatting RMarkdown document 
+
+```{r}
+thanksgiving <-read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-11-20/thanksgiving_meals.csv")
+
+```
+### Part 2: Data Wrangling and visualization
+
+#1. Display the first 10 rows of the dataset using `kable()` function
+
+```{r}
+kable(thanksgiving[1:10,])
+```
+
+#2. Using `skim()` display the summary of variables. 
+
+```{r}
+skim(thanksgiving)
+```
+
+#2.1 Think about the task to predict a family income based on their menu: what variables may be useful? Are all of them correct type? Write 2-3 sentences with your explanation.
+
+Among the above variables 5 are likely to predict the family income based on the menu. The variables include main dish, main preparation (how it is cooked), kind of stuffing, type of cranberry and having gravy.
+
+
+#3. Use `fct_reorder` and `parse_number` functions to create a factor variable `family_income`.
+
+```{r}
+changed_data <-thanksgiving %>%
+   mutate(family_income= fct_reorder(family_income, parse_number(family_income)))
+
+
+  skim(changed_data)
+  
+```
+
+#4. What is the number of people who celebrate? 
+```{r}
+thanksgiving %>%
+  filter(celebrate=="Yes")%>%
+  count(celebrate)
+```
+
+#5. What are categories and insights for each main dish served and the method it is prepared? 
+
+```{r}
+kable(thanksgiving %>%
+count(main_dish, main_prep, sort = TRUE) %>%
+filter(!is.na(main_dish) & !is.na(main_prep)), format = "html")
+```
+
+#6. Create 3 different data viz showing insights for main dish served and the method. Provide your own legend and use themes.
+
+
+```{r}
+#First Visualization
+#By using geom_bar() in the first visualisation it display the major meal offered with the technique of prepration, whether baked,roasted or etc.
+
+thanksgiving %>%
+filter(main_prep == "Baked" | main_prep == "Fried" | main_prep == "Roasted") %>%
+ggplot(aes(main_dish, fill = main_dish)) + geom_bar() + facet_wrap(vars(main_prep)) +
+theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+```
+
+```{r}
+#Second Visualization
+#By using geom_jitter in the second visualisation portraying the small blue checker box where the variables overlap, although it does not provide a clear picture.
+
+thanksgiving%>%
+ggplot(aes(  main_dish, main_prep))+
+geom_jitter(height=2, width=2.5,color="blue",shape=0)+
+scale_y_discrete()+
+labs(title="Second Visualization")+
+coord_flip()
+
+```
+
+```{r}
+#Third Visualization
+#By using geom_count() in the third visualization is easier and clear to understand. The purple dots represent the dish preparation procedure.
+
+thanksgiving%>%
+ggplot(aes(  main_dish, main_prep))+
+geom_count(color="purple",size=1)+
+labs(title="Third Visualization")+
+coord_flip()
+
+```
+
+#6.1 Write 2-3 sentences with your explanation of each insight.
+
+There are three methods of preparation, which include baked, fried and roasted. Among the methods, it is evident that fried is the least popular. Notably, across all the preparation methods, Turkey is the most common main dish.
+
+#7. How many use cranberry sauce? How many use gravy? 
+
+```{r}
+kable(thanksgiving %>%
+filter(!is.na(cranberry) & cranberry!="None") %>%
+count(), "html")
+
+kable(thanksgiving %>%
+filter(gravy=="Yes") %>%
+count(gravy), "html")
+```
+
+#8-9. What is the distribution of those who celebrate across income ranges. Create a data viz and Write 2-3 sentences with your explanation of each insight. 
+
+```{r}
+table(thanksgiving$family_income)
+ thanksgiving %>%
+ filter(celebrate == "Yes") %>%
+ ggplot(aes(family_income)) + geom_bar(aes(family_income)) +
+ ggtitle("Celebrating Thanksgiving")
+```
+
+##From the histogram visualization above exhibits a normal distribution of family income. However a sustainable number preferred not to answer.
+
+#10. Use the following code to create a new dataset and Write 2-3 sentences with your explanation of what it does.
+
+```{r}
+thankgiving2=thanksgiving%>%
+  select(id, starts_with("side"),
+         starts_with("pie"),
+         starts_with("dessert")) %>%
+  select(-side15, -pie13, -dessert12) %>%
+  gather(type, value, -id) %>%
+  filter(!is.na(value),!value %in% c("None", "Other (please specify)")) %>%
+  mutate(type = str_remove(type, "\\d+"))
+```
+
+##The above command selected 3 variables to form a data set, thanksgiving 2. The variables include ID, type and value. consequently, all missing values in the Value variable were omitted.
+
+#11-12. Intall package `widyr` and use `pairwise_cor()` function https://www.rdocumentation.org/packages/widyr/versions/0.1.3/topics/pairwise_cor and Write 2-3 sentences with your explanation of what it does. 
+
+```{r}
+library(widyr)
+thankgiving2%>%
+pairwise_cor(value, id, sort = TRUE)
+```
+
+##The result exhibit the correlation between items within the same column. That is the correlation of items within Value variable.
+
+# 13. Use `lm()` or randomForest() function to build a model that predict a family income based on data in the dataset.
+
+```{r}
+##Classification Model 1
+
+rf1 <- randomForest( family_income ~ celebrate + main_dish ,data = changed_data, na.action = na.omit)
+
+print(rf1)
+
+##Classification Model 2
+
+rf2 <- randomForest( family_income ~ celebrate + main_prep ,data = changed_data, na.action = na.omit)
+
+print(rf2)
+
+##Classification Model 3
+
+rf3 <- randomForest( family_income ~ celebrate + stuffing ,data = changed_data, na.action = na.omit)
+
+print(rf3)
+
+```
+
+## In classification model 1 shows that the family who celebrates thanks giving are higher and the families choosed turkey as their main dish. However, I assume the families who celebrates thanks giving chances of their income is on the high side.
+
+## In classification model 2 shows that the family are coming from the higher income and average side. The way of prepping the the main dish uses either baking or roasting and it take smiliar amount of time to prepare the main dish.
+
+## In classification model 3 shows that the majority of the family uses bread based staffing for the main dish and only a few uses rice based.
